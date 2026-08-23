@@ -1,0 +1,32 @@
+# Python & Environment Clutter
+# Virtual environment (Your local packages/Python standalone instances)
+.venv/
+env/
+venv/
+ENV/
+
+# Python caching binaries (Bytecode compilation)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Project & Data Specifics
+# Heavy datasets (Prevents accidentally pushing raw transaction logs to GitHub)
+data/
+*.csv
+*.npy
+*.npz
+
+# Tooling, Logs, and App Infrastructure
+# Local Flower runtime states and caches
+.flwr/
+*.fab
+
+# Environment secret files
+.env
+
+# IDE / Editor clutter
+.DS_Store
+.vscode/
+.idea/

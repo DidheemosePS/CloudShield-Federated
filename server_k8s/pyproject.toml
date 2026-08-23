@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cloudshield-server"
+version = "1.0.0"
+description = "Server-side orchestration and MLflow tracking"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "cloudshield-shared",
+    "flwr[simulation]",
+    "ray",
+    "mlflow",
+]
+
+[tool.uv.sources]
+cloudshield-shared = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

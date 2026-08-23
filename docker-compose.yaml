@@ -1,0 +1,167 @@
+name: cloudshield-federated
+
+networks:
+  flwr-network:
+    driver: bridge
+
+services:
+  # MLflow Tracking UI & Store
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow
+    ports:
+      - "8080:8080"
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////app/server_k8s/mlflow_data/mlflow.db
+      --default-artifact-root /app/server_k8s/mlflow_data/artifacts
+      --host 0.0.0.0
+      --port 8080
+    environment:
+      - MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE=true
+    volumes:
+      - ./server_k8s/mlflow_data:/app/server_k8s/mlflow_data
+    networks:
+      - flwr-network
+
+  # Flower SuperLink (Control Plane)
+  superlink:
+    image: flwr/superlink:latest
+    container_name: superlink
+    command:
+      - --insecure
+      - --isolation
+      - process
+    ports:
+      - "9091:9091"
+      - "9092:9092"
+      - "9093:9093"
+    networks:
+      - flwr-network
+
+  # SuperExec for ServerApp
+  superexec-serverapp:
+    build: .
+    image: cloudshield-federated:latest
+    container_name: superexec-serverapp
+    command:
+      - --insecure
+      - --plugin-type
+      - serverapp
+      - --appio-api-address
+      - superlink:9091
+    volumes:
+      - ./server_k8s/data/server_test.parquet:/app/server_k8s/data/server_test.parquet:ro
+      - ./server_k8s/mlflow_data:/app/server_k8s/mlflow_data
+    depends_on:
+      - superlink
+      - mlflow
+    networks:
+      - flwr-network
+
+  # SuperNodes (Execution Node Managers)
+  supernode-1:
+    image: flwr/supernode:latest
+    container_name: supernode-1
+    command:
+      - --insecure
+      - --superlink
+      - superlink:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9094
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=0 num-partitions=3"
+    depends_on:
+      - superlink
+    networks:
+      - flwr-network
+
+  supernode-2:
+    image: flwr/supernode:latest
+    container_name: supernode-2
+    command:
+      - --insecure
+      - --superlink
+      - superlink:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9095
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=1 num-partitions=3"
+    depends_on:
+      - superlink
+    networks:
+      - flwr-network
+
+  supernode-3:
+    image: flwr/supernode:latest
+    container_name: supernode-3
+    command:
+      - --insecure
+      - --superlink
+      - superlink:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9096
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=2 num-partitions=3"
+    depends_on:
+      - superlink
+    networks:
+      - flwr-network
+
+  # SuperExec for ClientApps
+  superexec-clientapp-1:
+    build: .
+    image: cloudshield-federated:latest
+    container_name: superexec-clientapp-1
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-1:9094
+    volumes:
+      - ./client_edge/data/processed/client_0.parquet:/app/client_edge/data/processed/client_0.parquet
+    depends_on:
+      - supernode-1
+    networks:
+      - flwr-network
+
+  superexec-clientapp-2:
+    build: .
+    image: cloudshield-federated:latest
+    container_name: superexec-clientapp-2
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-2:9095
+    volumes:
+      - ./client_edge/data/processed/client_1.parquet:/app/client_edge/data/processed/client_1.parquet
+    depends_on:
+      - supernode-2
+    networks:
+      - flwr-network
+
+  superexec-clientapp-3:
+    build: .
+    image: cloudshield-federated:latest
+    container_name: superexec-clientapp-3
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-3:9096
+    volumes:
+      - ./client_edge/data/processed/client_2.parquet:/app/client_edge/data/processed/client_2.parquet
+    depends_on:
+      - supernode-3
+    networks:
+      - flwr-network

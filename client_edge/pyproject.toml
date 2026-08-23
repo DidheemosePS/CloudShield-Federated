@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cloudshield-client"
+version = "1.0.0"
+description = "Edge client training runtime"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "cloudshield-shared",
+    "flwr",
+]
+
+[tool.uv.sources]
+cloudshield-shared = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
