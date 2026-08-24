@@ -1,27 +1,32 @@
 [project]
-name = "fraud-detection-fl"
+name = "cloudshield-federated"
 version = "1.0.0"
 description = "Root workspace orchestration"
 requires-python = ">=3.11,<3.13"
 license = { text = "MIT" }
 dependencies = [
-    "cloudshield-shared",
-    "cloudshield-server",
-    "cloudshield-client",
+    "shared",
+    "server_k8s",
+    "client_edge",
 ]
 
 [tool.uv.sources]
-cloudshield-shared = { workspace = true }
-cloudshield-server = { workspace = true }
-cloudshield-client = { workspace = true }
+shared = { workspace = true }
+server_k8s = { workspace = true }
+client_edge = { workspace = true }
 
 [tool.uv.workspace]
 members = ["shared", "server_k8s", "client_edge"]
 
 [tool.flwr.app]
-publisher = "cloudshield"
+publisher = "cloudshield-federated"
 
 [tool.flwr.app.pack]
+packages = [
+    "server_k8s",
+    "client_edge",
+    "shared"
+]
 exclude = [
     ".venv",
     "__pycache__",

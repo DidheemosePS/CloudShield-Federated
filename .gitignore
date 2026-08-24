@@ -30,3 +30,7 @@ data/
 .DS_Store
 .vscode/
 .idea/
+
+# ML flow
+mlflow_data/
+.DS_Store

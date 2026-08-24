@@ -33,6 +33,6 @@ USER app
 
 # Install dependencies from uv.lock without installing the local project package
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --no-install-project
+    uv sync --frozen --no-install-workspace
 
 ENTRYPOINT [ "flower-superexec" ]

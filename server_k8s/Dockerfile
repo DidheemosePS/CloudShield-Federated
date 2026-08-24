@@ -12,34 +12,27 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 WORKDIR /app
 
-ENV UV_COMPILE_BYTECODE=1 \
+# Ensure virtualenv binaries are prioritized and configure UV behavior
+ENV PATH="/app/.venv/bin:$PATH" \
+    UV_COMPILE_BYTECODE=0 \
     UV_LINK_MODE=copy \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    GIT_PYTHON_REFRESH=quiet
 
-# Copy workspace config & lockfile from ROOT
+# Copy project manifests to leverage layer caching for dependencies
 COPY pyproject.toml uv.lock ./
 COPY shared/pyproject.toml ./shared/
 COPY server_k8s/pyproject.toml ./server_k8s/
+COPY client_edge/pyproject.toml ./client_edge/
 
-# Pre-fetch & install dependencies ONLY for server (cached layer)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --package cloudshield-server --no-dev --no-install-workspace
-
-# Copy source code for shared and server
-COPY shared ./shared
-COPY server_k8s ./server_k8s
-
-# Complete sync (installs workspace packages)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --package cloudshield-server --no-dev
-
-# Fix ownership so non-root 'app' user can execute and write to /app
+# Copy dependency files with correct ownership for user 'app'
 RUN chown -R app:app /app
-
-ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/server_k8s/app:/app/shared/src:$PYTHONPATH"
 
 # Switch to default 'app' user and install dependencies
 USER app
+
+# Install dependencies from uv.lock without installing the local project package
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --project server_k8s --no-install-workspace
 
 ENTRYPOINT [ "flower-superexec" ]

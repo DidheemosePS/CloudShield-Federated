@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cloudshield-shared"
+name = "shared"
 version = "1.0.0"
 description = "Shared models and utilities for Fraud Detection FL"
 requires-python = ">=3.11,<3.13"
