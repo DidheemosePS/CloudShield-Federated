@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superlink-deployment
+  labels:
+    app: superlink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superlink
+  template:
+    metadata:
+      labels:
+        app: superlink
+    spec:
+      containers:
+        - name: superlink
+          image: flwr/superlink:latest
+          command: ["flower-superlink"]
+          args:
+            - "--insecure"
+            - "--isolation"
+            - "process"
+          ports:
+            - containerPort: 9091
+            - containerPort: 9092
+            - containerPort: 9093
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"

@@ -50,6 +50,8 @@ services:
       - serverapp
       - --appio-api-address
       - superlink:9091
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:8080
     volumes:
       - ./server_k8s/data/server_test.parquet:/app/server_k8s/data/server_test.parquet:ro
       - ./server_k8s/mlflow_data:/app/server_k8s/mlflow_data
@@ -116,7 +118,6 @@ services:
 
   # SuperExec for ClientApps
   superexec-clientapp-1:
-    build: .
     image: cloudshield-federated:latest
     container_name: superexec-clientapp-1
     command:
@@ -133,7 +134,6 @@ services:
       - flwr-network
 
   superexec-clientapp-2:
-    build: .
     image: cloudshield-federated:latest
     container_name: superexec-clientapp-2
     command:
@@ -150,7 +150,6 @@ services:
       - flwr-network
 
   superexec-clientapp-3:
-    build: .
     image: cloudshield-federated:latest
     container_name: superexec-clientapp-3
     command:

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superexec-serverapp-deployment
+  labels:
+    app: superexec-serverapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superexec-serverapp
+  template:
+    metadata:
+      labels:
+        app: superexec-serverapp
+    spec:
+      containers:
+        - name: superexec-serverapp
+          image: superexec-serverapp:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--insecure"
+            - "--plugin-type"
+            - "serverapp"
+            - "--appio-api-address"
+            - "superlink-service:9091"
+          env:
+            - name: MLFLOW_TRACKING_URI
+              value: http://mlflow-service:8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"

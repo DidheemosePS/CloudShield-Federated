@@ -282,12 +282,14 @@ version = "1.0.0"
 source = { editable = "client_edge" }
 dependencies = [
     { name = "flwr" },
+    { name = "mlflow" },
     { name = "shared" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "flwr" },
+    { name = "mlflow" },
     { name = "shared", editable = "shared" },
 ]
 

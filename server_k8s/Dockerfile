@@ -25,6 +25,9 @@ COPY shared/pyproject.toml ./shared/
 COPY server_k8s/pyproject.toml ./server_k8s/
 COPY client_edge/pyproject.toml ./client_edge/
 
+# Copy the entire data directory into /app/server_k8s/data/
+COPY server_k8s/data/ ./server_k8s/data/
+
 # Copy dependency files with correct ownership for user 'app'
 RUN chown -R app:app /app
 
