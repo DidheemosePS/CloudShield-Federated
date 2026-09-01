@@ -1,58 +1,51 @@
 name: cloudshield-clients
 
-networks:
-  flwr-network:
-    driver: bridge
-
 services:
   # SuperNodes (Execution Node Managers)
   supernode-1:
     image: flwr/supernode:latest
     container_name: supernode-1
     command:
-      - --insecure
-      - --superlink
-      - host.docker.internal:9092
-      - --clientappio-api-address
-      - 0.0.0.0:9094
-      - --isolation
-      - process
+      - --root-certificates=/etc/flwr/certs/ca.crt
+      - --superlink=host.docker.internal:9092
+      - --clientappio-api-address=0.0.0.0:9094
+      - --isolation=process
       - --node-config
-      - "partition-id=0 num-partitions=3"
+      - partition-id=0 num-partitions=3
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ../certificates:/etc/flwr/certs:ro
 
   supernode-2:
     image: flwr/supernode:latest
     container_name: supernode-2
     command:
-      - --insecure
-      - --superlink
-      - host.docker.internal:9092
-      - --clientappio-api-address
-      - 0.0.0.0:9095
-      - --isolation
-      - process
+      - --root-certificates=/etc/flwr/certs/ca.crt
+      - --superlink=host.docker.internal:9092
+      - --clientappio-api-address=0.0.0.0:9095
+      - --isolation=process
       - --node-config
-      - "partition-id=1 num-partitions=3"
+      - partition-id=1 num-partitions=3
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ../certificates:/etc/flwr/certs:ro
 
   supernode-3:
     image: flwr/supernode:latest
     container_name: supernode-3
     command:
-      - --insecure
-      - --superlink
-      - host.docker.internal:9092
-      - --clientappio-api-address
-      - 0.0.0.0:9096
-      - --isolation
-      - process
+      - --root-certificates=/etc/flwr/certs/ca.crt
+      - --superlink=host.docker.internal:9092
+      - --clientappio-api-address=0.0.0.0:9096
+      - --isolation=process
       - --node-config
-      - "partition-id=2 num-partitions=3"
+      - partition-id=2 num-partitions=3
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ../certificates:/etc/flwr/certs:ro
 
   # SuperExec for ClientApps
   superexec-clientapp-1:
@@ -63,45 +56,33 @@ services:
     container_name: superexec-clientapp-1
     command:
       - --insecure
-      - --plugin-type
-      - clientapp
-      - --appio-api-address
-      - supernode-1:9094
+      - --plugin-type=clientapp
+      - --appio-api-address=supernode-1:9094
     volumes:
       - ./data/processed/client_0.parquet:/app/client_edge/data/processed/client_0.parquet
     depends_on:
       - supernode-1
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   superexec-clientapp-2:
     image: client_edge:latest
     container_name: superexec-clientapp-2
     command:
       - --insecure
-      - --plugin-type
-      - clientapp
-      - --appio-api-address
-      - supernode-2:9095
+      - --plugin-type=clientapp
+      - --appio-api-address=supernode-2:9095
     volumes:
       - ./data/processed/client_1.parquet:/app/client_edge/data/processed/client_1.parquet
     depends_on:
       - supernode-2
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   superexec-clientapp-3:
     image: client_edge:latest
     container_name: superexec-clientapp-3
     command:
       - --insecure
-      - --plugin-type
-      - clientapp
-      - --appio-api-address
-      - supernode-3:9096
+      - --plugin-type=clientapp
+      - --appio-api-address=supernode-3:9096
     volumes:
       - ./data/processed/client_2.parquet:/app/client_edge/data/processed/client_2.parquet
     depends_on:
       - supernode-3
-    extra_hosts:
-      - "host.docker.internal:host-gateway"

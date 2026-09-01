@@ -1,0 +1,36 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: cloudshield-gateway
+spec:
+  gatewayClassName: cloudshield-gatewayclass-controller
+  listeners:
+    - name: https-mlflow
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: flower-server-certs
+
+    - name: node-api
+      protocol: HTTPS
+      port: 9092
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: flower-server-certs
+
+    - name: control-api
+      protocol: HTTPS
+      port: 9093
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: flower-server-certs

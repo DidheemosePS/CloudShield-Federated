@@ -1,0 +1,25 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: superlink-node-route
+spec:
+  parentRefs:
+    - name: cloudshield-gateway
+      sectionName: node-api
+  rules:
+    - backendRefs:
+        - name: superlink-service
+          port: 9092
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: superlink-control-route
+spec:
+  parentRefs:
+    - name: cloudshield-gateway
+      sectionName: control-api
+  rules:
+    - backendRefs:
+        - name: superlink-service
+          port: 9093

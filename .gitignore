@@ -34,3 +34,9 @@ data/
 # ML flow
 mlflow_data/
 .DS_Store
+
+# Certificates
+*.crt
+*.key
+*.srl
+*.csr
