@@ -19,7 +19,10 @@ spec:
           image: flwr/superlink:latest
           command: ["flower-superlink"]
           args:
-            - "--insecure"
+            - "--ssl-ca-certfile=/etc/flwr/config/ca.crt"
+            - "--ssl-certfile=/etc/flwr/certs/tls.crt"
+            - "--ssl-keyfile=/etc/flwr/certs/tls.key"
+            - "--enable-supernode-auth"
             - "--isolation"
             - "process"
           ports:
@@ -33,3 +36,17 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "500m"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/flwr/config
+              readOnly: true
+            - name: tls-secret-volume
+              mountPath: /etc/flwr/certs
+              readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: superlink-ca-configmap
+        - name: tls-secret-volume
+          secret:
+            secretName: flower-server-certs

@@ -17,3 +17,6 @@ subjectAltName = @alt_names
 
 [ alt_names ]
 IP.1  = 127.0.0.1
+DNS.1 = superlink
+DNS.2 = superlink.default.svc.cluster.local
+DNS.3 = localhost

@@ -40,3 +40,5 @@ mlflow_data/
 *.key
 *.srl
 *.csr
+*.pem
+keys/*
