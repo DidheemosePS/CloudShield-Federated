@@ -1,0 +1,32 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prediction-api-route
+spec:
+  parentRefs:
+    - name: cloudshield-gateway
+      sectionName: https-prediction-api
+  rules:
+    - backendRefs:
+        - name: prediction-api-service
+          kind: Service
+          port: 3000
+      matches:
+        - path:
+            type: Exact
+            value: /
+        - path:
+            type: Exact
+            value: /predict
+        - path:
+            type: Exact
+            value: /health
+        - path:
+            type: Exact
+            value: /ready
+        - path:
+            type: Exact
+            value: /docs
+        - path:
+            type: Exact
+            value: /openapi.json

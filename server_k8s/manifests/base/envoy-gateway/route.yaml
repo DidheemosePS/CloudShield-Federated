@@ -8,6 +8,29 @@ spec:
     - name: https-mlflow
       protocol: HTTPS
       port: 443
+      hostname: mlflow.local
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: flower-server-certs
+
+    - name: https-prediction-api
+      protocol: HTTPS
+      port: 443
+      hostname: api.local
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: flower-server-certs
+
+    - name: https-grafana
+      protocol: HTTPS
+      port: 443
+      hostname: grafana.local
       tls:
         mode: Terminate
         certificateRefs:

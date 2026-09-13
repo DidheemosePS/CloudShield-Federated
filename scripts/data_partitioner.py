@@ -1,4 +1,5 @@
 from pathlib import Path
+import joblib
 import numpy as np
 import polars as pl
 from sklearn.model_selection import train_test_split
@@ -54,6 +55,10 @@ def run_data_partitioner(
     print(
         f"Saved server test set: {test_file} ({len(test_df):,} samples)"
     )
+    
+    scaler_file = server_path / "global_scaler.pkl"
+    joblib.dump(global_scaler, scaler_file)
+    print(f"Saved global feature scaler: {scaler_file}")
     
     # Dirichlet Non-IID Partitioning for Clients
     np.random.seed(seed)

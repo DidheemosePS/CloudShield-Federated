@@ -17,7 +17,7 @@ spec:
       containers:
         - name: superexec-serverapp
           image: superexec-serverapp:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:
             - "--insecure"
             - "--plugin-type"

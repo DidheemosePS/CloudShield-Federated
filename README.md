@@ -1,8 +1,4 @@
-Here is the comprehensive, enterprise-grade project documentation (`README.md`) updated to integrate **Phase 4 (Central Inference & Production Telemetry)**.
-
----
-
-# CloudShield-Federated: Production-Grade Hybrid Federated Learning MLOps Platform
+# CloudShield-Federated: Production-Grade Hybrid Federated Learning MLOps Platform (Version 1.0)
 
 **CloudShield-Federated** is an enterprise-ready, cross-silo Federated Learning platform engineered for secure financial fraud detection. It bridges privacy-preserving distributed learning at the edge with centralized cloud orchestration, experiment tracking, secure zero-trust communication, real-time inference serving, and cluster-wide telemetry.
 
@@ -21,30 +17,37 @@ The platform uses a **hybrid split-architecture** designed to enforce absolute d
 ## 📂 Monorepo Structure
 
 ```text
-fraud-detection-fl/
-├── Dockerfile                  # Root container configuration
-├── docker-compose.yaml         # Multi-service local orchestration
-├── pyproject.toml              # Global project dependencies and build system
-├── uv.lock                     # Lockfile for reproducible environment builds
-├── LICENCE                     # Platform licensing information
-├── README.md                   # Comprehensive project documentation
-├── certificates/               # Mutual TLS (mTLS) and CA authority certificates
-├── keys/                       # Elliptic-curve cryptographic keys for SuperNode auth
-├── scripts/                    # Data partitioning and maintenance utilities
-├── shared/                     # Shared PyTorch models, utilities, and schemas
-├── client_edge/                # Edge node container runtimes & local data partitions
-│   ├── Dockerfile              # Lightweight SuperNode container build
-│   ├── docker-compose.yaml     # Edge-specific multi-container configurations
-│   ├── pyproject.toml          # Client-side dependency specifications
-│   ├── app/                    # Client app logic (ClientApp training loops)
-│   └── data/                   # Raw CSV datasets and processed Parquet splits
-└── server_k8s/                 # Central Cloud Control Plane & Kubernetes manifests
-    ├── Dockerfile              # Central build context for SuperLink/FastAPI
-    ├── pyproject.toml          # Server-side dependency specifications
-    ├── app/                    # Central services (ServerApp & FastAPI prediction service)
-    ├── data/                   # Central server evaluation datasets
-    ├── manifests/              # Kubernetes base manifests, PVCs, and Envoy gateways
-    └── mlflow_data/            # SQLite tracking database and versioned model artifacts (.pt2)
+cloudshield-federated/
+├── .github/                      # GitHub
+├── assets/
+│   └── custom-architecture.png   # System architecture diagram
+├── certificates/                 # TLS certs, configuration, and keys (ca, server, san)
+├── client_edge/                  # Edge client node implementation
+│   ├── app/                      # Client app logic and python cache
+│   ├── data/                     # Local partitioned datasets (raw & processed parquets)
+│   ├── Dockerfile
+│   ├── docker-compose.yaml
+│   └── pyproject.toml
+├── keys/                         # Supernode cryptographic keys
+├── scripts/
+│   └── data_partitioner.py       # Dataset partitioning utility
+├── server_k8s/                   # Central server and Kubernetes MLOps stack
+│   ├── app/                      # Server orchestrator & FastAPI prediction service
+│   ├── data/                     # Global data scalers and test sets
+│   ├── manifests/                # K8s base manifests (Envoy Gateway, Grafana, MLflow, Prometheus, Flower etc.)
+│   ├── mlflow_data/              # Local MLflow tracking data, sqlite db, and model artifacts
+│   ├── Dockerfile
+│   ├── Dockerfile.prediction     # Dedicated Dockerfile for the inference API
+│   └── pyproject.toml
+├── shared/                       # Shared FL logic across client and server
+│   ├── fraud_detection_fl/       # Shared neural network model and utilities
+│   └── pyproject.toml            # Shared package configuration
+├── Dockerfile                    # Root container definition
+├── LICENCE
+├── README.md
+├── docker-compose.yaml           # Local multi-container deployment
+├── pyproject.toml                # Root project dependencies configuration
+└── uv.lock                       # uv dependency lock file
 
 ```
 
@@ -65,21 +68,22 @@ fraud-detection-fl/
 
 ### Phase 3: Kubernetes Infrastructure, Envoy Gateway TLS & Node Auth (**COMPLETED**)
 
-- **Envoy Gateway Ingress:** Implemented edge TLS termination with backend re-encryption to protect cluster-internal gRPC communications.
+- **Envoy Gateway Ingress:** Implemented edge TLS termination on port 443 with backend re-encryption to protect cluster-internal gRPC communications.
 - **Cryptographic Node Whitelisting:** Enforced `--enable-supernode-auth` on `SuperLink` using Elliptic Curve key pairs (`.pem`/`.pub`) registered via `flwr supernode register`. Only verified clients are allowed to join federated training rounds.
+- **Persistent State:** Attached a Kubernetes PersistentVolume to `SuperLink` to ensure registered client node whitelists survive pod evictions and rolling restarts.
 
-### Phase 4: Central Inference, Serving & Telemetry (**CURRENT**)
+### Phase 4: Central Inference, Serving & Telemetry (**COMPLETED - VERSION 1.0**)
 
-- **FastAPI Prediction Service:** Deployed `prediction_app.py` inside the Kubernetes cluster to load peak global checkpoints from MLflow and serve low-latency `/v1/predict` HTTP requests.
-- **Production Telemetry:** Configured Prometheus and Grafana scrapers monitoring pod resource usage, inter-node gRPC latency, and client health check heartbeats.
+- **FastAPI Lifespan Management:** Deployed `prediction_app.py` inside Kubernetes utilizing asynchronous context management to fetch the `champion` model alias and pre-fitted `global_scaler.pkl` directly from MLflow upon startup.
+- **Input Validation & Safety:** Integrated strict Pydantic schemas (`PredictionRequest`, `PredictionResponse`) to validate incoming transaction payloads and prevent malformed requests.
+- **Probes & Telemetry Integration:** Configured lightweight Kubernetes liveness (`/health`) and readiness (`/ready`) probes tied to model availability, alongside automatic metric collection via `prometheus-fastapi-instrumentator` at `/metrics`.
+- **Observability Platform:** Deployed and connected Prometheus servers and Grafana dashboards to visualize real-time request throughput, P95/P99 latency percentiles, and error metrics.
 
 ---
 
 ## 🔮 Future Phases & Roadmap
 
-### Phase 5: Autonomous Diagnostic Agents & LLM Observability (**PLANNED**)
+### Phase 5: Autonomous Diagnostic Agents & LLM Observability (**PLANNED / VERSION 2.0**)
 
-- **Autonomous Log Ingestion:** Integrate a lightweight diagnostic log-parsing agent to ingest streamed pod metrics and identify non-IID data drift or straggling node connections in real time.
+- **Autonomous Log Ingestion:** Integrate an automated log-parsing agent to ingest streamed pod metrics and identify non-IID data drift or straggling node connections in real time.
 - **Automated Remediation:** Implement automated scaling triggers for edge resources based on federated training round durations.
-
----

@@ -22,13 +22,13 @@ spec:
             - "--ssl-ca-certfile=/etc/flwr/config/ca.crt"
             - "--ssl-certfile=/etc/flwr/certs/tls.crt"
             - "--ssl-keyfile=/etc/flwr/certs/tls.key"
+            - "--database=/superlink/state/state.db"
             - "--enable-supernode-auth"
-            - "--isolation"
-            - "process"
+            - "--isolation=process"
           ports:
-            - containerPort: 9091
-            - containerPort: 9092
-            - containerPort: 9093
+            - containerPort: 9091 # Control API
+            - containerPort: 9092 # Node API
+            - containerPort: 9093 # Exec API
           resources:
             requests:
               memory: "128Mi"
@@ -43,6 +43,8 @@ spec:
             - name: tls-secret-volume
               mountPath: /etc/flwr/certs
               readOnly: true
+            - name: superlink-storage
+              mountPath: /superlink/state
       volumes:
         - name: config-volume
           configMap:
@@ -50,3 +52,6 @@ spec:
         - name: tls-secret-volume
           secret:
             secretName: flower-server-certs
+        - name: superlink-storage
+          persistentVolumeClaim:
+            claimName: superlink-pvc

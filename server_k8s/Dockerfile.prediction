@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+# Copy UV binary from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app
+
+# Initialize a uv project and add dependencies (automatically generates pyproject.toml and uv.lock)
+RUN uv init --no-readme --app \
+    && uv add fastapi[standard] mlflow torch==2.13.0 scikit-learn==1.9.0 prometheus-fastapi-instrumentator
+
+# Copy your application code into the working directory
+COPY server_k8s/app/prediction_api.py ./
+
+# Expose the application port
+EXPOSE 3000
+
+# Run the app using uv run (it automatically uses the project's virtual environment)
+CMD ["uv", "run", "fastapi", "run", "prediction_api.py", "--port", "3000"]

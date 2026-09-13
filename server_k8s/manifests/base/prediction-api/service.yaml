@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prediction-api-service
+spec:
+  type: ClusterIP
+  selector:
+    app: prediction-api
+  ports:
+    - name: prediction-api
+      port: 3000
+      targetPort: 3000

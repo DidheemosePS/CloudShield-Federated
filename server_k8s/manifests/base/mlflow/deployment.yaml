@@ -23,9 +23,10 @@ spec:
             - server
           args:
             - --backend-store-uri
-            - sqlite:////app/server_k8s/mlflow_data/mlflow.db
-            - --default-artifact-root
-            - /app/server_k8s/mlflow_data/artifacts
+            - sqlite:////mlflow/mlflow.db
+            - --artifacts-destination
+            - /mlflow/artifacts
+            - --serve-artifacts
             - --host
             - 0.0.0.0
             - --port
@@ -45,7 +46,7 @@ spec:
               memory: 4Gi
           volumeMounts:
             - name: mlflow-storage
-              mountPath: /app/server_k8s/mlflow_data
+              mountPath: /mlflow
       volumes:
         - name: mlflow-storage
           persistentVolumeClaim:
